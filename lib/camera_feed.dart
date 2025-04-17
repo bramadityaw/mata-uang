@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mata_uang/currency_informer.dart';
+import 'package:mata_uang/model.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import './util.dart';
@@ -18,7 +20,7 @@ class _CameraFeedState extends State<CameraFeed> {
   late List<CameraDescription> cameras;
   late CameraController controller;
 
-  File? imageFile;
+  String? nominal;
 
   @override
   void initState() {
@@ -39,63 +41,22 @@ class _CameraFeedState extends State<CameraFeed> {
 
   @override
   Widget build(BuildContext context) {
+    if (!controller.value.isInitialized) {
+      return Container();
+    }
+    controller.startImageStream(setNominal);
     return Scaffold(
       body: SafeArea(
         child: Stack(
-          children: [
-            CameraPreview(controller),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: _cameraControls(),
-              //child: SizedBox(
-              //  child: ColoredBox(
-              //    color: Colors.black,
-              //  ),
-              //),
-            ),
-          ],
+          children: [CameraPreview(controller), CurrencyInformer(nominal)],
         ),
       ),
     );
   }
 
-  Widget _cameraControls() {
-    return
-    // Padding(
-    // padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0 * 8),
-    // child:
-    Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Column(
-          children: [
-            ElevatedButton(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              child: const Text('Gallery'),
-            ),
-          ],
-        ),
-        Column(
-          children: [
-            ElevatedButton(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              child: const Text('Gallery'),
-            ),
-          ],
-        ),
-        Column(children: []),
-      ],
-    );
-  }
-
-  void _pickImage(ImageSource src) async {
-    ImagePicker picker = ImagePicker();
-    XFile? file = await picker.pickImage(source: src);
-    if (file == null) return;
-    setState(() {
-      imageFile = File(file.path);
-    });
-    todo();
+  void setNominal(CameraImage img) {
+    final data = img.planes.map((p) => p.bytes).toList();
+    nominal = NominalRecognizer.process(data);
   }
 
   void _requestPermissions() {
@@ -116,7 +77,8 @@ class _CameraFeedState extends State<CameraFeed> {
       final availCams = await availableCameras();
       if (availCams.isNotEmpty) {
         cameras = availCams;
-        controller = CameraController(availCams.first, ResolutionPreset.high);
+        // TODO: Detect whether ResolutionPreset can be set to high.
+        controller = CameraController(availCams.first, ResolutionPreset.low);
       } else {
         showErr("No cameras are available");
       }
@@ -129,9 +91,10 @@ class _CameraFeedState extends State<CameraFeed> {
     return controller
         .initialize()
         .then((_) {
-          if (mounted) {
-            setState(() {});
+          if (!mounted) {
+            return;
           }
+          setState(() {});
         })
         .catchError((e) {
           if (e is CameraException) {
