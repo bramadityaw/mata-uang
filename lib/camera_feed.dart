@@ -18,7 +18,7 @@ class CameraFeed extends StatefulWidget {
 
 class _CameraFeedState extends State<CameraFeed> {
   late List<CameraDescription> cameras;
-  late CameraController controller;
+  CameraController? controller;
 
   String? nominal;
 
@@ -35,20 +35,22 @@ class _CameraFeedState extends State<CameraFeed> {
 
   @override
   void dispose() {
-    controller.dispose();
+    if (controller != null) {
+      controller!.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
+    if (controller == null || !controller!.value.isInitialized) {
       return Container();
     }
-    controller.startImageStream(setNominal);
+    controller!.startImageStream(setNominal);
     return Scaffold(
       body: SafeArea(
         child: Stack(
-          children: [CameraPreview(controller), CurrencyInformer(nominal)],
+          children: [CameraPreview(controller!), CurrencyInformer(nominal)],
         ),
       ),
     );
@@ -88,7 +90,7 @@ class _CameraFeedState extends State<CameraFeed> {
   }
 
   Future<void> _initController() {
-    return controller
+    return controller!
         .initialize()
         .then((_) {
           if (!mounted) {
