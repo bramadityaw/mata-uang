@@ -1,14 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:mata_uang/detector.dart';
 
 class CurrencyInformer extends StatelessWidget {
-  // depends on data from camera
-  const CurrencyInformer(this.nominal, {super.key});
-  final String? nominal;
+  final Detection? detection;
+
+  const CurrencyInformer(this.detection, {super.key});
+
   @override
   Widget build(BuildContext context) {
-    if (nominal == null) {
-      return Container();
-    }
-    return Text(nominal!);
+    return Visibility(
+      visible: detection != null,
+      child: Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.5, // Lower half
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xE6FFFFFF),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0x33000000),
+                blurRadius: 12,
+                spreadRadius: 4,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                detection?.nominal ?? '',
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                detection != null || detection!.confidence < 80.0
+                    ? '${(detection!.confidence).toStringAsFixed(1)}% Confidence'
+                    : '',
+                style: const TextStyle(fontSize: 24, color: Colors.black54),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
