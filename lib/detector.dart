@@ -1,19 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
-import 'package:mata_uang/util.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
-
-class VggMean {
-  /// Mean value for the red channel
-  static const red = 123.68;
-
-  /// Mean value for the green channel
-  static const green = 116.779;
-
-  /// Mean value for the blue channel
-  static const blue = 103.939;
-}
 
 class CurrencyDetector {
   static const _path = 'assets/models/mata_uang_mobilenet.tflite';
