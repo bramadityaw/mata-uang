@@ -6,6 +6,12 @@ class CurrencyInformer extends StatelessWidget {
 
   const CurrencyInformer(this.detection, {super.key});
 
+  static const _minConfidence = 80.0;
+
+  bool _isConfident() {
+    return detection != null && detection!.confidence > _minConfidence;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Visibility(
@@ -36,7 +42,7 @@ class CurrencyInformer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                detection?.nominal ?? '',
+                _isConfident() ? detection!.nominal : '',
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -45,7 +51,7 @@ class CurrencyInformer extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                detection != null || detection!.confidence < 80.0
+                _isConfident()
                     ? '${(detection!.confidence).toStringAsFixed(1)}% Confidence'
                     : '',
                 style: const TextStyle(fontSize: 24, color: Colors.black54),
