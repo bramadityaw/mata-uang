@@ -7,12 +7,17 @@ plugins {
 
 dependencies {
     implementation( "org.tensorflow:tensorflow-android:+" )
+    implementation( "org.tensorflow:tensorflow-lite-gpu-api:+" )
 }
 
 android {
     namespace = "com.example.mata_uang"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
+
+    lint {
+        disable += "ExpiredTargetSdkVersion"
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
